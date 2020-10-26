@@ -1,31 +1,50 @@
 package com.wolf.oswolfapi.controller;
 
 import com.wolf.oswolfapi.model.Cliente;
+import com.wolf.oswolfapi.service.ClienteService;
 import io.swagger.annotations.Api;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
 @Api(tags = "Clientes")
+@RequiredArgsConstructor
+@RequestMapping("/clientes")
 public class ClienteController {
 
-    @GetMapping("/clientes")
-    public List<Cliente> listar() {
-        var cliente = new Cliente();
-        cliente.setId(1L);
-        cliente.setNome("João 2");
-        cliente.setTelefone("4564465465");
-        cliente.setEmail("email@mail.com");
-        var cliente2 = new Cliente();
-        cliente2.setId(2L);
-        cliente2.setNome("maria");
-        cliente2.setTelefone("4564465465");
-        cliente2.setEmail("email@mail.com");
+    private final ClienteService service;
 
+    @GetMapping
+    public ResponseEntity<List<Cliente>> listar() {
+        return ResponseEntity.ok(service.listarTudo());
+    }
 
-        return Arrays.asList(cliente, cliente2);
+    @GetMapping("/{id}")
+    public ResponseEntity<Cliente> buscar(@PathVariable Long id) {
+        return ResponseEntity.ok(service.buscarPeloId(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletar(@PathVariable Long id) {
+        service.deletarPeloId(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Cliente cadastrar(@RequestBody @Valid Cliente cliente) {
+        return service.salvar(cliente);
+    }
+
+    @PutMapping
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<Cliente> editar(@Valid Cliente cliente) {
+        return ResponseEntity.ok(service.editar(cliente));
     }
 }
